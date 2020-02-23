@@ -1,0 +1,126 @@
+<html lang="en">
+
+<head>
+    <meta charset="etf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- bootstrap css libraries-->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for ('static', filename='css/main.css') }}">
+
+    <!-- jquery/ bootstrap js libraries-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Visualization</h1>
+            </div>
+            <div class="col-md-6" style="text-align: right;">
+                <h4>Rajat R Hande</h4>
+                <h4>112684167</h4>
+            </div>
+        </div>
+
+        <p>Assignment 2</p>
+
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab1" data-toggle="tab">Data clustering and Decimation</a></li>
+            <li><a href="#tab2" data-toggle="tab">Dimension Reduction</a></li>
+            <li><a href="#tab3" data-toggle="tab">Visualizations</a></li>
+        </ul>
+
+        <div class="tab-content container">
+            <div id="tab1" class="tab-pane fade in active">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12" style="margin-bottom: 15px;">
+                        <h4>Task 1: data clustering and decimation</h4>
+                    </div>
+                    <div class="col-lg-3 col-md-3">
+                        <table class="table" style="border: 1px solid lightgray; cursor: pointer;">
+                            <tbody>
+                                <tr id="tab10" onclick="onRowClick(0)">
+                                    <td>Random Sampling</td>
+                                </tr>
+                                <tr id="tab11" onclick="onRowClick(1)">
+                                    <td>K Means Clustering</td>
+                                </tr>
+                                <tr id="tab12" onclick="onRowClick(2)">
+                                    <td>Stratified Sampling</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-9 col-md-9 well" style="height: 68vh;" id="tab1Canvas">
+                        <h5></h5>
+                    </div>
+                </div>
+            </div>
+            <div id="tab2" class="tab-pane fade">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12" style="margin-bottom: 15px;">
+                        <h4>Task 2: Dimension Reduction on both org and 2 types of reduced data</h4>
+                    </div>
+                    <div class="col-lg-3 col-md-3">
+                        <table class="table" style="border: 1px solid lightgray; cursor: pointer;">
+                            <tbody>
+                                <tr id="tab20" onclick="onRowClick(0)">
+                                    <td>PCA Random Sampling</td>
+                                </tr>
+                                <tr id="tab21" onclick="onRowClick(1)">
+                                    <td>PCA Adaptive Sampling</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-9 col-md-9 well" style="height: 68vh;" id="tab2Canvas">
+                        <h5></h5>
+                    </div>
+                </div>
+            </div>
+            <div id="tab3" class="tab-pane fade">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12" style="margin-bottom: 15px;">
+                        <h4>Task 3: visualization of both original and 2 types of reduced data</h4>
+                    </div>
+                    <div class="col-lg-3 col-md-3">
+                        <table class="table" style="border: 1px solid lightgray; cursor: pointer;">
+                            <tbody>
+                                <tr id="tab30" onclick="onRowClick(0)">
+                                    <td>MDS Euclidean Random Sampling</td>
+                                </tr>
+                                <tr id="tab31" onclick="onRowClick(1)">
+                                    <td>MDS Correlation Random Sampling</td>
+                                </tr>
+                                <tr id="tab32" onclick="onRowClick(2)">
+                                    <td>MDS Correlation Adaptive Sampling</td>
+                                </tr>
+                                <tr id="tab33" onclick="onRowClick(3)">
+                                    <td>Scatter Matrix Random Sampling</td>
+                                </tr>
+                                <tr id="tab34" onclick="onRowClick(4)">
+                                    <td>Scatter Matrix Adaptive Sampling</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-9 col-md-9 well" style="height: 68vh;" id="tab3Canvas">
+                        <h5></h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+</body>
+<!-- d3 libraries-->
+<script src="http://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script> -->
+<script src="{{ url_for('static', filename='js/index.js')}}"></script>
+
+</html>
