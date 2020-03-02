@@ -3,7 +3,7 @@ tabRowToURLMapping = {
     'tab11' : {url: '/test', title: 'K Means Clustering', desc: ''},
     'tab12' : {url: '/test', title: 'Stratified Sampling', desc: ''},
     'tab20' : {url: '/test', title: 'PCA Random Sampling', desc: ''},
-    'tab21' : {url: '/test', title: 'PCA Adaptive Sampling', desc: ''},
+    'tab21' : {url: '/plot_scree', title: 'PCA Adaptive Sampling', desc: ''},
     'tab30' : {url: '/test', title: 'MDS Euclidean Random Sampling', desc: ''},
     'tab31' : {url: '/test', title: 'MDS Euclidean Adaptive Sampling', desc: ''},
     'tab32' : {url: '/test', title: 'MDS Correlation Random Sampling', desc: ''},
@@ -33,18 +33,18 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 function formUrl() {
     rowObj = tabRowToURLMapping[(tab+String(row))]
     $( "#" + tab + "Canvas > h5").html(rowObj.title)
-    console.log(rowObj)
+    // console.log(rowObj)
 	$.ajax({
 	  type: 'GET',
 	  url: rowObj.url,
-      contentType: 'application/text; charset=utf-8',
-	  xhrFields: {
-		withCredentials: false
-	  },
+      contentType: 'application/json; charset=utf-8',
 	  headers: {
 	  },
 	  success: function(result) {
-          console.log(result)
+      console.log(rowObj)
+      if (rowObj.url == '/plot_scree') {
+        draw_scree_plot(result, 'LOL')
+      }
 	  },
 	  error: function(result) {
 		$("#error").html(result);
