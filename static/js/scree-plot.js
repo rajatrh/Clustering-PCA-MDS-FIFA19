@@ -1,6 +1,7 @@
 function draw_scree_plot(eigen_values) {
     var metaData = JSON.parse(eigen_values);
     data = []
+    // data.push({'pca': 0, 'pcaCumSum': 0})
     pcaLine = { x: -1, y: -1 };
 
     for (i = 0; i < metaData['pca'].length; i++) {
@@ -25,29 +26,8 @@ function draw_scree_plot(eigen_values) {
         .y(function (d) { return y(d.pcaCumSum); })
         .curve(d3.curveCardinal);
 
-    // var area = d3.area()
-    //     .x(function (d) { return x(d.date); })
-    //     .y0(height)
-    //     .y1(function (d) { return y(d.nps); })
-    //     .curve(d3.curveCardinal);
-
-    // var grid = d3.line()
-    //     .x(function (d) { return x(d); }) // set the x values for the line generator
-    //     .y(function (d) {
-    //         var sum = 0;
-    //         var avg = 0;
-    //         lineData.forEach(function (e) {
-    //             sum += e.nps;
-    //         });
-
-    //         avg = sum / lineData.length;
-
-    //         return y(20);
-    //     });
-
-    // var xAxis = d3.axisBottom().scale(x)
-
-    var xAxis = d3.axisBottom().scale(x).ticks(15)
+    var xAxis = d3.axisBottom().scale(x).ticks(16)
+        .tickFormat(function (d) { return d + 1 });
     var yAxis = d3.axisLeft().scale(y).ticks(10)
 
     var svg
@@ -61,26 +41,6 @@ function draw_scree_plot(eigen_values) {
     div = d3.select("#screeplotContainer").append("div")
         .attr("class", "tooltiptext")
         .style("opacity", 0);
-
-    // svg.append("path")
-    //     .data([data])
-    //     .attr("class", "area")
-    //     .attr("d", area);
-
-    // svg[i].append("linearGradient")
-    //     .attr("id", "temperature-gradient")
-    //     .attr("gradientUnits", "userSpaceOnUse")
-    //     .attr("x1", 0).attr("y1", y(5))
-    //     .attr("x2", 0).attr("y2", y(75))
-    //     .selectAll("stop")
-    //     .data([
-    //         { offset: "0%", color: "#F8FCFE" },
-    //         { offset: "50%", color: "#E7F5FE" },
-    //         { offset: "100%", color: "#E1F2FC" }
-    //     ])
-    //     .enter().append("stop")
-    //     .attr("offset", function (d) { return d.offset; })
-    //     .attr("stop-color", function (d) { return d.color; });
 
     svg.append("path")
         .data([data])
@@ -107,7 +67,6 @@ function draw_scree_plot(eigen_values) {
             .attr("stroke", 'teal')
             .attr("stroke-dasharray", "5,5")
             .attr("stroke-width", 1)
-
     }
 
     svg.append("g")
@@ -138,10 +97,11 @@ function draw_scree_plot(eigen_values) {
         .attr("cx", function (d, i) { return x(i) })
         .attr("cy", function (d) { return y(d.pcaCumSum) })
         .attr("r", 5)
-        .on("mouseover", function (d) {
-            var html = d.pcaCumSum
-            // "<br/><span style='margin-left: 10px; color: #666;'>" + inc_rate + "% \
-            //         <span style='color: #09CE4F;'>&uarr;</span></span>";
+        .on("mouseover", function (d, i) {
+            var html = "<span style='font-weight: bolder; color: teal;'>" +
+                (i+1)+ "</span>" +
+                "<br/><span style='color: orange;'> "+
+                (Math.round((d.pcaCumSum * 100000)) / 1000)   + "%</span>";
 
             div.transition()
                 .duration(200)
