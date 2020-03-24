@@ -1,6 +1,8 @@
-function draw_scree_plot(eigen_values) {
-    var metaData = JSON.parse(eigen_values);
+function draw_scree_plot(eigen_values, source) {
+    var mData = JSON.parse(eigen_values);
+    metaData = mData[source]
     data = []
+    populateDataTable(metaData['significance'])
     // data.push({'pca': 0, 'pcaCumSum': 0})
     pcaLine = { x: -1, y: -1 };
 
@@ -49,7 +51,6 @@ function draw_scree_plot(eigen_values) {
 
     // Add PCA Line
     if (pcaLine.x != -1) {
-        console.log(pcaLine.x)
         svg.append("line")
             .attr("x1", x(pcaLine.x))
             .attr("x2", x(pcaLine.x))
@@ -78,7 +79,7 @@ function draw_scree_plot(eigen_values) {
         .attr("y", height + 70)
         .attr("dx", width / 2 - margin.left)
         .attr("text-anchor", "start")
-        .text('PCA Features')
+        .text('PCA Dimensions')
 
     svg.selectAll(".bar")
         .data(data)
@@ -99,9 +100,9 @@ function draw_scree_plot(eigen_values) {
         .attr("r", 5)
         .on("mouseover", function (d, i) {
             var html = "<span style='font-weight: bolder; color: teal;'>" +
-                (i+1)+ "</span>" +
-                "<br/><span style='color: orange;'> "+
-                (Math.round((d.pcaCumSum * 100000)) / 1000)   + "%</span>";
+                (i + 1) + "</span>" +
+                "<br/><span style='color: orange;'> " +
+                (Math.round((d.pcaCumSum * 100000)) / 1000) + "%</span>";
 
             div.transition()
                 .duration(200)
@@ -128,4 +129,15 @@ function draw_scree_plot(eigen_values) {
         .attr("text-anchor", "end")
         .text("Variance (0-1)")
 
+}
+
+
+function populateDataTable(data) {
+    $('#significanceTable').DataTable().clear().draw();
+    Object.keys(data).forEach(key => {
+        $('#significanceTable').DataTable().row.add( [
+            key,
+            Math.round(data[key] * 1000) / 1000
+        ]).draw( false );
+    });  
 }

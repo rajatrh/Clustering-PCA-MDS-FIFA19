@@ -9,58 +9,101 @@ from flask import flash, redirect, render_template, request, session, abort
 
 import numpy as np
 import pandas as pd
+import matplotlib as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.manifold import MDS
+from scipy.spatial.distance import cdist
 
 randomSample = pd.DataFrame()
 adaptiveSample = pd.DataFrame()
-sampleSize = 12000
+overallSamples = 2000
+sampleSize = 1500
 specs_csv = pd.DataFrame()
-std_specs_csv = []
-ftrs = ["MRSP"]
+copy_specs_csv = pd.DataFrame()
+mainColumns = []
+inertias = []
+sqaureLoadings = {}
+topFeatures = dict()
 
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route('/')
 def home():
-	return render_template('index.html')
+    return render_template('index.html')
+
 
 @app.route('/test')
 def welcome():
     return 'Welcome'
 
+
 def init():
     # Read CSV
     global specs_csv
-    global std_specs_csv
-    specs_csv = pd.read_csv('data/car_spec.csv', low_memory=False)
-    # Normalize the data and keep
-    std_specs_csv = StandardScaler().fit_transform(specs_csv)
-    print('Loaded data : ' + str(specs_csv.shape))
-    clustering()
-    generate_random_sample()
-    generate_adaptive_sample()
-    #squared_loadings = plot_intrinsic_dimensionality_pca(specs_csv, 6)
-    #imp_ftrs = sorted(range(len(squared_loadings)), key=lambda k: squared_loadings[k], reverse=True)
-    #print(imp_ftrs)
+    global copy_specs_csv
+    global mainColumns
+    global sampleSize
+    global topFeatures
+    specs_csv = pd.read_csv('data/football.csv', low_memory=False)
+    copy_specs_csv = specs_csv
+    del specs_csv['Name']
+    #specs_csv = specs_csv.sample(overallSamples)
+    sampleSize = int(len(specs_csv) / 2)
+    # print(list(specs_csv.columns))
+    specs_csv.reset_index(inplace=True)
+    del specs_csv['index']
 
-def clustering():
+    print('Loaded data : ' + str(specs_csv.shape))
+    mainColumns = list(specs_csv.columns)
+    
+    #mainColumns.remove('Name')
+    #print(mainColumns)
+    clustering(specs_csv)
+    clusteringForK()
+    
+    generateRandomSample()
+    generateAdaptiveSample()
+    for i in range(0, 3):
+        sig = {}
+        source, name = dataSourceMapping(i)
+        sl = loadSquareLoadings(source, 10)
+        sqaureLoadings[name] = sl
+        i = 0
+        for col in mainColumns:
+            sig[col] = sl[i]
+            i = i+1
+        topFeatures[name] = []
+        for w in sorted(sig, key=sig.get, reverse=True):
+            topFeatures[name].append(w)
+
+def dataSourceMapping(index, excludeClusterId=True):
+    if index == 0:
+        return randomSample[mainColumns] if excludeClusterId else randomSample, 'randomSample'
+    if index == 1:
+        return adaptiveSample[mainColumns] if excludeClusterId else adaptiveSample, 'adaptiveSample'
+    if index == 2:
+        return specs_csv[mainColumns] if excludeClusterId else specs_csv, 'sample'
+
+
+def clusteringForK():
     k = 6
     kmeans = KMeans(n_clusters=k)
     kmeans.fit(specs_csv)
     labels = kmeans.labels_
     specs_csv['clusterId'] = pd.Series(labels)
-    
-# Task 1A - Generate a random sample
-def generate_random_sample():
+
+
+def generateRandomSample():
     global randomSample
-    chosen_idx = np.random.choice(sampleSize, replace = False, size=sampleSize)
+    chosen_idx = np.random.choice(sampleSize, replace=False, size=sampleSize)
     randomSample = specs_csv.iloc[chosen_idx]
 
-# Task 1A - Generate a stratified sample
-def generate_adaptive_sample():
+
+def generateAdaptiveSample():
     global adaptiveSample
 
     stratifiedCluster = {}
@@ -69,47 +112,154 @@ def generate_adaptive_sample():
     for i in range(6):
         cluster = specs_csv[specs_csv['clusterId'] == i]
         clusterSize = len(cluster) * sampleSize / lenData
-        chosen_idx = np.random.choice(int(clusterSize), replace = False, size=int(clusterSize))
+        chosen_idx = np.random.choice(
+            int(clusterSize), replace=False, size=int(clusterSize))
         stratifiedCluster[i] = cluster.iloc[chosen_idx]
-    
+
     for i in range(6):
         adaptiveSample = adaptiveSample.append(stratifiedCluster[i])
 
-# def plot_intrinsic_dimensionality_pca(data, k):
-#     [eigenValues, eigenVectors] = generate_eigenValues(data)
-#     squaredLoadings = []
-#     ftrCount = len(eigenVectors)
-#     for ftrId in range(0, ftrCount):
-#         loadings = 0
-#         for compId in range(0, k):
-#             loadings = loadings + eigenVectors[compId][ftrId] * eigenVectors[compId][ftrId]
-#         squaredLoadings.append(loadings)
-#     return squaredLoadings
 
-def perform_PCA(data, numberOfPC=15):
+def generateEigenValues(data):
+    covMat = np.cov(data.T)
+    eigenValues, eigenVectors = np.linalg.eig(covMat)
+
+    # Sort Eigen Values
+    ev = eigenValues.argsort()[::-1]
+    eigenValues = eigenValues[ev]
+    eigenVectors = eigenVectors[:, ev]
+    return eigenValues, eigenVectors
+
+
+def loadSquareLoadings(data, dimen):
+    eigenValues, eigenVectors = generateEigenValues(data)
+    squaredLoadings = []
+    # mappedLoadings = {}
+    featureCount = len(eigenVectors)
+    for ftrId in range(0, featureCount):
+        loadings = 0
+        for compId in range(0, dimen):
+            loadings = loadings + \
+                eigenVectors[compId][ftrId] * eigenVectors[compId][ftrId]
+        squaredLoadings.append(loadings)
+    return squaredLoadings
+
+
+def performPCA(data, numberOfPC=15):
     # Standardize the data to have a mean of ~0 and a variance of 1
-    X_std = StandardScaler().fit_transform(adaptiveSample)
+    X_std = StandardScaler().fit_transform(data)
     # Create a PCA instance: pca
     pca = PCA(n_components=numberOfPC)
     principalComponents = pca.fit_transform(X_std)
     return pca.explained_variance_ratio_, pca.explained_variance_ratio_.cumsum()
 
+
+def performPCAForScatter(Xdata):
+    X_std = StandardScaler().fit_transform(Xdata)
+    pca = PCA(n_components=2)
+    principalComponents = pca.fit_transform(X_std)
+    df = pd.DataFrame(principalComponents)
+    return df
+
+@app.route("/elbow_curve")
+def getInteria():
+    return json.dumps({'inertia': inertias})
+
+def clustering(Xdata): 
+    global inertias
+    X_std = StandardScaler().fit_transform(Xdata)
+    for k in range(1, 20):
+        model = KMeans(n_clusters=k)
+        model.fit(X_std)
+        inertias.append(model.inertia_)
+
 @app.route("/plot_scree")
-def scree_adaptive():
+def plot_scree():
+    sourceArray = {}
     pcaCumSum = []
     pca = []
-    print("Inside scree")
-    # Plotting scree plot using random samples
-    try:
-        pca, pcaCumSum = perform_PCA(adaptiveSample)
-    except:
-        e = sys.exc_info()[0]
-        print(e)
-    return json.dumps({'pca': pca.tolist(), 'pcaCumSum' : pcaCumSum.tolist()})
+    for i in range(0, 3):
+        source, name = dataSourceMapping(i)
+        # Plotting scree plot using random samples
+        try:
+            pca, pcaCumSum = performPCA(source)
+        except:
+            e = sys.exc_info()[0]
+            print(e)
+
+        sig = {}
+        squaredLoadings = sqaureLoadings[name]
+
+        i = 0
+        for col in mainColumns:
+            sig[col] = squaredLoadings[i]
+            i = i+1
+
+        sourceArray[name] = {'pca': pca.tolist(),
+                             'pcaCumSum': pcaCumSum.tolist(),
+                             'significance': sig
+                             }
+
+    return json.dumps(sourceArray)
+
+
+@app.route("/plot_scattered_pca")
+def plot_scattered_pca():
+    typ = request.args.get('dataType')
+
+    source, name = dataSourceMapping(int(typ))
+    sourceC, nameC = dataSourceMapping(int(typ), False)
+    res = performPCAForScatter(source)
+    res['cluster'] = sourceC['clusterId']
+    # res = res.head(6000)
+    return res.to_json()
+
+@app.route("/plot_mds")
+def plot_mds():
+    sourceArray = {}
+    typ = request.args.get('dataType')
+    diss = request.args.get('dissimilarity')
+    df = pd.DataFrame()
+
+    if diss == 'euclidean':
+        df = euclidean_mds(int(typ))
+    else:
+        df = precomputed_mds(int(typ))
+
+    return df.to_json()
+
+def euclidean_mds(t):
+    source, name = dataSourceMapping(t)
+    sourceC, nameC = dataSourceMapping(t, False)
+    X_std = StandardScaler().fit_transform(source)
+    model = MDS(n_components=2, random_state=1)
+    res = model.fit_transform(X_std)
+    df = pd.DataFrame(res)
+    df['cluster'] = sourceC['clusterId']
+    return df
+
+def precomputed_mds(t):
+    source, name = dataSourceMapping(t)
+    sourceC, nameC = dataSourceMapping(t, False)
+    X_std = StandardScaler().fit_transform(source)
+    Y = cdist(X_std, X_std, 'correlation')
+    model = MDS(n_components=2, random_state=1, dissimilarity='precomputed', n_jobs=-1)
+    res = model.fit_transform(Y)
+    df = pd.DataFrame(res)
+    df['cluster'] = sourceC['clusterId']
+    return df
+
+@app.route("/plot_pairplot")
+def plot_pairplot():
+    typ = request.args.get('dataType')
+
+    source, name = dataSourceMapping(int(typ), False)
+    #df = pd.DataFrame()
+    df = source[topFeatures[name][:3]].copy()
+    df['cluster'] = source['clusterId']
+    return df.to_json()
 
 if __name__ == '__main__':
     init()
     port = 8081
     app.run(host='0.0.0.0', port=port, debug=True)
-    
-    

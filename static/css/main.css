@@ -1,4 +1,14 @@
 .table>tbody>tr.active>td {
     background: teal !important;
     color: #fff;
-  }
+}
+
+
+div#loading {
+    position: absolute;
+    z-index: 1000;
+    left: 45%;
+    top: 45%;
+    width: 35px;
+    height: 35px;
+}

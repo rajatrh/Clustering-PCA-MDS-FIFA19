@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- bootstrap css libraries-->
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link res="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+    <!-- <link res="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+    -->
     <link rel="stylesheet" type="text/css" href="{{ url_for ('static', filename='css/main.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for ('static', filename='css/scree-plot.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for ('static', filename='css/scatter-plot.css') }}">
 
     <!-- jquery/ bootstrap js libraries-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
@@ -15,8 +19,13 @@
 
 <body>
 
-    <div class="container">
-        <div class="row">
+    <div id="loading">
+        <img src="{{ url_for('static',
+  filename='images/loading.gif') }}">
+    </div>
+
+    <div style="padding: 0px 20px;">
+        <div class="row" id="content">
             <div class="col-md-6">
                 <h1>Visualization</h1>
             </div>
@@ -31,57 +40,79 @@
         <ul class="nav nav-tabs">
             <li class="active"><a href="#tab1" data-toggle="tab">Data clustering and Decimation</a></li>
             <li><a href="#tab2" data-toggle="tab">Dimension Reduction</a></li>
-            <li><a href="#tab3" data-toggle="tab">Visualizations</a></li>
+            <li><a href="#tab3" data-toggle="tab">PCA Scatter Plots</a></li>
+            <li><a href="#tab4" data-toggle="tab">MDS Visualization</a></li>
+            <li><a href="#tab5" data-toggle="tab">Scatter Matrix</a></li>
         </ul>
 
-        <div class="tab-content container">
+        <div class="tab-content" style="padding: 10px;">
             <div id="tab1" class="tab-pane fade in active">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12" style="margin-bottom: 15px;">
-                        <h4>Task 1: data clustering and decimation</h4>
                     </div>
-                    <div class="col-lg-3 col-md-3">
+                    <div class="col-lg-2 col-md-2">
                         <table class="table" style="border: 1px solid lightgray; cursor: pointer;">
                             <tbody>
                                 <tr id="tab10" onclick="onRowClick(0)">
-                                    <td>Random Sampling</td>
+                                    <td>K Means Clustering</td>
                                 </tr>
-                                <tr id="tab11" onclick="onRowClick(1)">
+                                <!-- <tr id="tab11" onclick="onRowClick(1)">
                                     <td>K Means Clustering</td>
                                 </tr>
                                 <tr id="tab12" onclick="onRowClick(2)">
                                     <td>Stratified Sampling</td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-lg-9 col-md-9 well" style="height: 68vh;" id="tab1Canvas">
+                    <div class="col-lg-10 col-md-10 well" style="height: 68vh;" id="tab1Canvas">
                         <h5></h5>
+                        <div class="col-md-8 col-xl-8 col-lg-8 col-sm-12 col-xs-12" id="lineplotContainer">
+
+                        </div>
                     </div>
                 </div>
             </div>
             <div id="tab2" class="tab-pane fade">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12" style="margin-bottom: 15px;">
-                        <h4>Task 2: Dimension Reduction on both org and 2 types of reduced data</h4>
+                        <!-- <h4>Task 2: Dimension Reduction on both org and 2 types of reduced data</h4> -->
                     </div>
-                    <div class="col-lg-3 col-md-3">
+                    <div class="col-lg-2 col-md-2">
                         <table class="table" style="border: 1px solid lightgray; cursor: pointer;">
                             <tbody>
                                 <tr id="tab20" onclick="onRowClick(0)">
-                                    <td>PCA Random Sampling</td>
+                                    <td>PCA Whole Data</td>
                                 </tr>
                                 <tr id="tab21" onclick="onRowClick(1)">
-                                    <td>PCA Adaptive Sampling</td>
-                                    
+                                    <td>PCA Random Sample</td>
+                                </tr>
+                                <tr id="tab22" onclick="onRowClick(2)">
+                                    <td>PCA Adaptive Sample</td>
+
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-lg-9 col-md-9 well" style="height: 68vh;" id="tab2Canvas">
+                    <div class="col-lg-10 col-md-9 well" style="height: 68vh;" id="tab2Canvas">
                         <h5></h5>
-                        <div class="col-md-12 col-sm-12 col-xs-12" id="screeplotContainer">
+                        <div class="col-md-8 col-xl-8 col-lg-8 col-sm-12 col-xs-12" id="screeplotContainer">
 
+                        </div>
+                        <div class="col-md-4 col-xl-4 col-lg-4 col-sm-12 col-xs-12">
+                            <!-- style="height: 54vh; overflow-y: scroll;" -->
+                            <table style="font-size: small;" id="significanceTable"
+                                class="table table-striped table-bordered display order-column display"
+                                style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th>Significance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -89,31 +120,91 @@
             <div id="tab3" class="tab-pane fade">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12" style="margin-bottom: 15px;">
-                        <h4>Task 3: visualization of both original and 2 types of reduced data</h4>
                     </div>
-                    <div class="col-lg-3 col-md-3">
+                    <div class="col-lg-2 col-md-2">
                         <table class="table" style="border: 1px solid lightgray; cursor: pointer;">
                             <tbody>
                                 <tr id="tab30" onclick="onRowClick(0)">
-                                    <td>MDS Euclidean Random Sampling</td>
+                                    <td>scatterd PCA for Whole Data</td>
                                 </tr>
                                 <tr id="tab31" onclick="onRowClick(1)">
-                                    <td>MDS Correlation Random Sampling</td>
+                                    <td>scatterd PCA for Random Sample</td>
                                 </tr>
                                 <tr id="tab32" onclick="onRowClick(2)">
-                                    <td>MDS Correlation Adaptive Sampling</td>
-                                </tr>
-                                <tr id="tab33" onclick="onRowClick(3)">
-                                    <td>Scatter Matrix Random Sampling</td>
-                                </tr>
-                                <tr id="tab34" onclick="onRowClick(4)">
-                                    <td>Scatter Matrix Adaptive Sampling</td>
+                                    <td>scatterd PCA for Adaptive Sample</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-lg-9 col-md-9 well" style="height: 68vh;" id="tab3Canvas">
+                    <div class="col-lg-10 col-md-10 well" style="height: 68vh;" id="tab3Canvas">
                         <h5></h5>
+                        <div class="col-md-1 col-xl-1 col-lg-1">
+
+                        </div>
+                        <div class="col-md-10 col-xl-10 col-lg-10 col-sm-12 col-xs-12" id="scatterplotContainer">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab4" class="tab-pane fade">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12" style="margin-bottom: 15px;">
+                    </div>
+                    <div class="col-lg-2 col-md-2">
+                        <table class="table" style="border: 1px solid lightgray; cursor: pointer;">
+                            <tbody>
+                                <tr id="tab40" onclick="onRowClick(0)">
+                                    <td>Euclidean Random Sampling</td>
+                                </tr>
+                                <tr id="tab41" onclick="onRowClick(1)">
+                                    <td>Euclidean Adaptive Sampling</td>
+                                </tr>
+                                <tr id="tab42" onclick="onRowClick(2)">
+                                    <td>Precomputed Random Sampling</td>
+                                </tr>
+                                <tr id="tab43" onclick="onRowClick(3)">
+                                    <td>Precomputed Adaptive Sampling</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-10 col-md-10 well" style="height: 68vh;" id="tab4Canvas">
+                        <h5></h5>
+                        <div class="col-md-1 col-xl-1 col-lg-1">
+
+                        </div>
+                        <div class="col-md-10 col-xl-10 col-lg-10 col-sm-12 col-xs-12" id="scatterplotContainer1">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab5" class="tab-pane fade">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12" style="margin-bottom: 15px;">
+                    </div>
+                    <div class="col-lg-2 col-md-2">
+                        <table class="table" style="border: 1px solid lightgray; cursor: pointer;">
+                            <tbody>
+                                <tr id="tab50" onclick="onRowClick(0)">
+                                    <td>Scatter Matrix for Random Sample</td>
+                                </tr>
+                                <tr id="tab51" onclick="onRowClick(1)">
+                                    <td>Scatter Matrix for Adaptive Sample</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-10 col-md-10 well" style="height: 68vh;" id="tab5Canvas">
+                        <h5></h5>
+                        <div class="col-md-1 col-xl-1 col-lg-1">
+
+                        </div>
+                        <div class="col-md-10 col-xl-10 col-lg-10 col-sm-12 col-xs-12" id="pairplotContainer">
+
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -126,6 +217,12 @@
 <!-- d3 libraries-->
 <script src="http://d3js.org/d3.v5.min.js" charset="utf-8"></script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script> -->
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
 <script src="{{ url_for('static', filename='js/index.js')}}"></script>
 <script src="{{ url_for('static', filename='js/scree-plot.js')}}"></script>
+<script src="{{ url_for('static', filename='js/scatter-plot.js')}}"></script>
+<script src="{{ url_for('static', filename='js/pair-plot.js')}}"></script>
+<script src="{{ url_for('static', filename='js/line-plot.js')}}"></script>
+
 </html>

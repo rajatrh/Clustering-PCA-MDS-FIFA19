@@ -28,6 +28,13 @@
       cursor: pointer;
   }
   
+  .xdot {
+    fill: #FFFFFF;
+    stroke: orange;
+    stroke-width: 2;
+    cursor: pointer;
+}
+  
   .dot:hover {
       r: 10;
       stroke-width: 3;
