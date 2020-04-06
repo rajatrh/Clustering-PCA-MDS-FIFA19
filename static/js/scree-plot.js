@@ -1,5 +1,5 @@
-function draw_scree_plot(eigen_values, source) {
-    var mData = JSON.parse(eigen_values);
+function draw_scree_plot(jsonData, source) {
+    var mData = JSON.parse(jsonData);
     metaData = mData[source]
     data = []
     populateDataTable(metaData['significance'])

@@ -1,5 +1,5 @@
-function draw_pair_plot(eigen_values, container = "scatterplotContainer") {
-    var mData = JSON.parse(eigen_values);
+function draw_pair_plot(jsonData, container = "scatterplotContainer") {
+    var mData = JSON.parse(jsonData);
     var data = modifyDataSetForPairPlot(mData)
     columns = Object.keys(data[0]).filter(d => d !== "cluster")
     

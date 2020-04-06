@@ -1,5 +1,5 @@
-function draw_scatter_plot(eigen_values, container = "scatterplotContainer") {
-    var mData = JSON.parse(eigen_values);
+function draw_scatter_plot(jsonData, container = "scatterplotContainer") {
+    var mData = JSON.parse(jsonData);
     var data = modifyDataSet(mData)
 
     document.getElementById(container).innerHTML = "";
@@ -41,8 +41,6 @@ function draw_scatter_plot(eigen_values, container = "scatterplotContainer") {
     svg.append("g")
         .call(d3.axisLeft(y));
 
-
-    // Color scale: give me a specie name, I return a color
     var color = d3.scaleOrdinal()
         .domain([0, 1, 2, 3, 4, 5])
         .range(["red", "green", "yellow", "blue", "violet", "gray"])
@@ -69,7 +67,6 @@ function draw_scatter_plot(eigen_values, container = "scatterplotContainer") {
         .attr("text-anchor", "left")
         .style("alignment-baseline", "middle")
 
-    // Add dots
     svg.append('g')
         .selectAll("dot")
         .data(data)

@@ -133,7 +133,6 @@ def generateEigenValues(data):
     covMat = np.cov(data.T)
     eigenValues, eigenVectors = np.linalg.eig(covMat)
 
-    # Sort Eigen Values
     ev = eigenValues.argsort()[::-1]
     eigenValues = eigenValues[ev]
     eigenVectors = eigenVectors[:, ev]
