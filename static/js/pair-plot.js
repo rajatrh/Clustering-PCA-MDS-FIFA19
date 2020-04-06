@@ -6,16 +6,14 @@ function draw_pair_plot(eigen_values, container = "scatterplotContainer") {
     document.getElementById(container).innerHTML = "";
 
     var margin = { top: 20, right: 20, bottom: 50, left: 70 };
-    // var width = parseInt(d3.select("#" + container).style("width")) - margin.left - margin.right;
-    // var height = 420 - margin.top - margin.bottom;
 
     padding = 20
-    size = 135
+    size = 220
 
     var svg
     svg = d3.select("#" + container).append("svg")
         .attr("width", "100%")
-        .attr("height", "90%")
+        .attr("height", "100%")
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
@@ -27,8 +25,8 @@ function draw_pair_plot(eigen_values, container = "scatterplotContainer") {
     y = x.map(x => x.copy().range([size - padding / 2, padding / 2]))
 
     z = d3.scaleOrdinal()
-        .domain(data.map(d => d.cluster))
-        .range(d3.schemeCategory10)
+        .domain([0, 1, 2, 3, 4, 5])
+        .range(["red", "green", "yellow", "blue", "violet", "gray"])
 
     const axisX = d3.axisBottom()
         .ticks(6)
@@ -49,12 +47,6 @@ function draw_pair_plot(eigen_values, container = "scatterplotContainer") {
         .each(function (d) { return d3.select(this).call(axisY.scale(d)); })
         .call(g => g.select(".domain").remove())
         .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"))
-    
-    //     svg.append("g")
-    //     .call(xAxis);
-
-    // svg.append("g")
-    //     .call(yAxis);
 
     const cell = svg.append("g")
         .selectAll("g")
@@ -64,7 +56,8 @@ function draw_pair_plot(eigen_values, container = "scatterplotContainer") {
 
     cell.append("rect")
         .attr("fill", "none")
-        .attr("stroke", "#aaa")
+        .attr("stroke", "orange")
+        .attr("stroke-width", 5)
         .attr("x", padding / 2 + 0.5)
         .attr("y", padding / 2 + 0.5)
         .attr("width", size - padding)
@@ -84,7 +77,7 @@ function draw_pair_plot(eigen_values, container = "scatterplotContainer") {
         .attr("fill", d => z(d.cluster));
 
     svg.append("g")
-        .style("font", "bold 10px sans-serif")
+        .attr("fill", "white")
         .style("pointer-events", "none")
         .selectAll("text")
         .data(columns)

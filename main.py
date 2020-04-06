@@ -49,8 +49,10 @@ def init():
     global sampleSize
     global topFeatures
     specs_csv = pd.read_csv('data/football.csv', low_memory=False)
-    copy_specs_csv = specs_csv
+    copy_specs_csv = specs_csv.copy()
     del specs_csv['Name']
+    del specs_csv['Value']
+    del specs_csv['Potential']
     #specs_csv = specs_csv.sample(overallSamples)
     sampleSize = int(len(specs_csv) / 2)
     # print(list(specs_csv.columns))
@@ -90,9 +92,10 @@ def dataSourceMapping(index, excludeClusterId=True):
 
 
 def clusteringForK():
-    k = 6
+    k = 4
+    X_std = StandardScaler().fit_transform(specs_csv)
     kmeans = KMeans(n_clusters=k)
-    kmeans.fit(specs_csv)
+    kmeans.fit(X_std)
     labels = kmeans.labels_
     specs_csv['clusterId'] = pd.Series(labels)
 
@@ -101,6 +104,8 @@ def generateRandomSample():
     global randomSample
     chosen_idx = np.random.choice(sampleSize, replace=False, size=sampleSize)
     randomSample = specs_csv.iloc[chosen_idx]
+    randomSample.reset_index(inplace=True)
+    del randomSample['index']
 
 
 def generateAdaptiveSample():
@@ -109,15 +114,19 @@ def generateAdaptiveSample():
     stratifiedCluster = {}
     lenData = len(specs_csv)
 
-    for i in range(6):
+    for i in range(4):
         cluster = specs_csv[specs_csv['clusterId'] == i]
         clusterSize = len(cluster) * sampleSize / lenData
         chosen_idx = np.random.choice(
             int(clusterSize), replace=False, size=int(clusterSize))
         stratifiedCluster[i] = cluster.iloc[chosen_idx]
 
-    for i in range(6):
+    for i in range(4):
         adaptiveSample = adaptiveSample.append(stratifiedCluster[i])
+
+    adaptiveSample.reset_index(inplace=True)
+    del adaptiveSample['index']
+    print(adaptiveSample['clusterId'].value_counts())
 
 
 def generateEigenValues(data):
@@ -134,21 +143,21 @@ def generateEigenValues(data):
 def loadSquareLoadings(data, dimen):
     eigenValues, eigenVectors = generateEigenValues(data)
     squaredLoadings = []
-    # mappedLoadings = {}
+
     featureCount = len(eigenVectors)
-    for ftrId in range(0, featureCount):
+    for fId in range(0, featureCount):
         loadings = 0
         for compId in range(0, dimen):
             loadings = loadings + \
-                eigenVectors[compId][ftrId] * eigenVectors[compId][ftrId]
+                eigenVectors[compId][fId] * eigenVectors[compId][fId]
         squaredLoadings.append(loadings)
     return squaredLoadings
 
 
 def performPCA(data, numberOfPC=15):
-    # Standardize the data to have a mean of ~0 and a variance of 1
+    # Standardize the data
     X_std = StandardScaler().fit_transform(data)
-    # Create a PCA instance: pca
+    # Create a PCA instance
     pca = PCA(n_components=numberOfPC)
     principalComponents = pca.fit_transform(X_std)
     return pca.explained_variance_ratio_, pca.explained_variance_ratio_.cumsum()
@@ -180,7 +189,6 @@ def plot_scree():
     pca = []
     for i in range(0, 3):
         source, name = dataSourceMapping(i)
-        # Plotting scree plot using random samples
         try:
             pca, pcaCumSum = performPCA(source)
         except:
@@ -210,7 +218,11 @@ def plot_scattered_pca():
     source, name = dataSourceMapping(int(typ))
     sourceC, nameC = dataSourceMapping(int(typ), False)
     res = performPCAForScatter(source)
+   
     res['cluster'] = sourceC['clusterId']
+    res['name'] = copy_specs_csv['Name']
+    #print(res.isna().value_counts())
+    print(res['cluster'].value_counts())
     # res = res.head(6000)
     return res.to_json()
 
@@ -236,6 +248,7 @@ def euclidean_mds(t):
     res = model.fit_transform(X_std)
     df = pd.DataFrame(res)
     df['cluster'] = sourceC['clusterId']
+    df['name'] = copy_specs_csv['Name']
     return df
 
 def precomputed_mds(t):
@@ -247,6 +260,7 @@ def precomputed_mds(t):
     res = model.fit_transform(Y)
     df = pd.DataFrame(res)
     df['cluster'] = sourceC['clusterId']
+    df['name'] = copy_specs_csv['Name']
     return df
 
 @app.route("/plot_pairplot")

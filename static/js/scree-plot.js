@@ -31,6 +31,7 @@ function draw_scree_plot(eigen_values, source) {
     var xAxis = d3.axisBottom().scale(x).ticks(16)
         .tickFormat(function (d) { return d + 1 });
     var yAxis = d3.axisLeft().scale(y).ticks(10)
+        .tickFormat(function (d) { return d * 100 + '%' });
 
     var svg
     var div
@@ -56,18 +57,18 @@ function draw_scree_plot(eigen_values, source) {
             .attr("x2", x(pcaLine.x))
             .attr("y1", y(pcaLine.y))
             .attr("y2", y(1.0))
-            .attr("stroke", 'teal')
+            .attr("stroke", 'white')
             .attr("stroke-dasharray", "5,5")
-            .attr("stroke-width", 1)
+            .attr("stroke-width", 3)
 
         svg.append("line")
             .attr("x1", x(0))
             .attr("x2", x(data.length))
             .attr("y1", y(0.7))
             .attr("y2", y(0.7))
-            .attr("stroke", 'teal')
+            .attr("stroke", 'white')
             .attr("stroke-dasharray", "5,5")
-            .attr("stroke-width", 1)
+            .attr("stroke-width", 3)
     }
 
     svg.append("g")
@@ -76,6 +77,7 @@ function draw_scree_plot(eigen_values, source) {
         .call(xAxis);
 
     svg.append("text")
+        .attr("fill", "white")
         .attr("y", height + 70)
         .attr("dx", width / 2 - margin.left)
         .attr("text-anchor", "start")
@@ -99,7 +101,7 @@ function draw_scree_plot(eigen_values, source) {
         .attr("cy", function (d) { return y(d.pcaCumSum) })
         .attr("r", 5)
         .on("mouseover", function (d, i) {
-            var html = "<span style='font-weight: bolder; color: teal;'>" +
+            var html = "<span style='font-weight: bolder; color: black;'>" +
                 (i + 1) + "</span>" +
                 "<br/><span style='color: orange;'> " +
                 (Math.round((d.pcaCumSum * 100000)) / 1000) + "%</span>";
@@ -119,25 +121,25 @@ function draw_scree_plot(eigen_values, source) {
 
     svg.append("g")
         .attr("class", "yaxis")
-        .attr("transform", "translate(-20,0)")
+        .attr("transform", "translate(-10,0)")
         .call(yAxis);
 
     svg.append("text")
         .attr("transform", "rotate(-90)")
+        .attr("fill", "white")
         .attr("x", -height / 2)
         .attr("y", -50)
         .attr("text-anchor", "end")
-        .text("Variance (0-1)")
+        .text("Variance")
 
 }
-
 
 function populateDataTable(data) {
     $('#significanceTable').DataTable().clear().draw();
     Object.keys(data).forEach(key => {
-        $('#significanceTable').DataTable().row.add( [
+        $('#significanceTable').DataTable().row.add([
             key,
             Math.round(data[key] * 1000) / 1000
-        ]).draw( false );
-    });  
+        ]).draw(false);
+    });
 }

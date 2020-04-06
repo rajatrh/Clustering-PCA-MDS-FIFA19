@@ -14,21 +14,22 @@ $(document).ready(function () {
 });
 
 tabRowToURLMapping = {
-  'tab10': { url: '/elbow_curve', title: 'Random Sampling', desc: '', data: {} },
+  'tab10': { url: '/elbow_curve', title: 'K Means Cluster', desc: '', data: {} },
   // 'tab11': { url: '/elbow_curve', title: 'K Means Clustering', desc: '', data: {} },
   // 'tab12': { url: '/elbow_curve', title: 'Stratified Sampling', desc: '', data: {} },
   'tab20': { url: '/plot_scree', title: 'PCA Whole Dataset', desc: 'sample', data: {} },
   'tab21': { url: '/plot_scree#alreadyLoaded', title: 'PCA Random Sample', desc: 'randomSample', data: {} },
   'tab22': { url: '/plot_scree#alreadyLoaded', title: 'PCA Adaptive Sample', desc: 'adaptiveSample', data: {} },
-  'tab30': { url: '/plot_scattered_pca', title: 'Scatterd PCA Whole Dataset', desc: 'sample', data: { dataType: 2 } },
-  'tab31': { url: '/plot_scattered_pca', title: 'Scatterd PCA Random Sample', desc: 'randomSample', data: { dataType: 0 } },
-  'tab32': { url: '/plot_scattered_pca', title: 'Scatterd PCA Adaptive Sample', desc: 'adaptiveSample', data: { dataType: 1 } },
-  'tab40': { url: '/plot_mds', title: 'Euclidean - Random Sample', desc: '', data: { dataType: 0, dissimilarity: 'euclidean'} },
-  'tab41': { url: '/plot_mds', title: 'Euclidean - Adaptive Sample', desc: '', data: { dataType: 1, dissimilarity: 'euclidean'} },
-  'tab42': { url: '/plot_mds', title: 'Precomputed - Random Sample', desc: '', data: { dataType: 0, dissimilarity: 'precomputed' } },
-  'tab43': { url: '/plot_mds', title: 'Precomputed - Adaptive Sample', desc: '', data: { dataType: 1, dissimilarity: 'precomputed' } },
-  'tab50': { url: '/plot_pairplot', title: 'Scatter Matrix Random Sample', desc: '', data: {dataType: 0} },
-  'tab51': { url: '/plot_pairplot', title: 'Scatter Matrix Adaptive Sample', desc: '', data: {dataType: 1} }
+  'tab30': { url: '/plot_scattered_pca', title: 'PCA - Whole Dataset', desc: 'sample', data: { dataType: 2 } },
+  'tab31': { url: '/plot_scattered_pca', title: 'PCA - Random Sample', desc: 'randomSample', data: { dataType: 0 } },
+  'tab32': { url: '/plot_scattered_pca', title: 'PCA - Adaptive Sample', desc: 'adaptiveSample', data: { dataType: 1 } },
+  'tab40': { url: '/plot_mds', title: 'MDS - Euclidean distance - Random Sample', desc: '', data: { dataType: 0, dissimilarity: 'euclidean'} },
+  'tab41': { url: '/plot_mds', title: 'MDS - Euclidean distance - Adaptive Sample', desc: '', data: { dataType: 1, dissimilarity: 'euclidean'} },
+  'tab42': { url: '/plot_mds', title: 'MDS - Correlation distance - Random Sample', desc: '', data: { dataType: 0, dissimilarity: 'precomputed' } },
+  'tab43': { url: '/plot_mds', title: 'MDS - Correlation distance - Adaptive Sample', desc: '', data: { dataType: 1, dissimilarity: 'precomputed' } },
+  'tab50': { url: '/plot_pairplot', title: 'Scatter Matrix - Whole Dataset', desc: '', data: {dataType: 0} },
+  'tab51': { url: '/plot_pairplot', title: 'Scatter Matrix - Random Sample', desc: '', data: {dataType: 1} },
+  'tab52': { url: '/plot_pairplot', title: 'Scatter Matrix - Adaptive Sample', desc: '', data: {dataType: 2} }
 }
 
 cachedResult = {};

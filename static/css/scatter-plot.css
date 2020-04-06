@@ -1,0 +1,7 @@
+.scatterdot {
+    cursor: pointer;
+}
+
+.scatterdot:hover {
+    r: 12;
+}
