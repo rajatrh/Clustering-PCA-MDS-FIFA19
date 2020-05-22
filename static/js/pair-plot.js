@@ -73,7 +73,7 @@ function draw_pair_plot(jsonData, container = "scatterplotContainer") {
 
     const circle = cell.selectAll("circle")
         .attr("r", 3.5)
-        .attr("fill-opacity", 0.7)
+        .attr("fill-opacity", 0.8)
         .attr("fill", d => z(d.cluster));
 
     svg.append("g")

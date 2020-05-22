@@ -51,7 +51,7 @@ function draw_scatter_plot(jsonData, container = "scatterplotContainer") {
         .enter()
         .append("circle")
         .attr("cx", width - 2 * margin.left)
-        .attr("cy", function (d, i) { return 260 + i * 20 }) // 100 is where the first dot appears. 25 is the distance between dots
+        .attr("cy", function (d, i) { return 260 + i * 20 })
         .attr("r", 4)
         .style("opacity", 1)
         .style("fill", function (d) { return color(d) })
@@ -61,8 +61,8 @@ function draw_scatter_plot(jsonData, container = "scatterplotContainer") {
         .enter()
         .append("text")
         .attr("x", width - 2 * margin.left + 20)
-        .attr("y", function (d, i) { return 260 + i * 20 }) // 100 is where the first dot appears. 25 is the distance between dots
-        .style("fill", function (d) { return color(d) })
+        .attr("y", function (d, i) { return 260 + i * 20 })
+        .style("fill", "white")
         .text(function (d) { return "cluster " + (d + 1) })
         .attr("text-anchor", "left")
         .style("alignment-baseline", "middle")
@@ -76,7 +76,7 @@ function draw_scatter_plot(jsonData, container = "scatterplotContainer") {
         .attr("cx", function (d) { return x(d.x); })
         .attr("cy", function (d) { return y(d.y); })
         .attr("r", 4)
-        .style("opacity", 0.5)
+        .style("opacity", 0.6)
         .style("fill", function (d) { return color(d.cluster) })
         .on("mouseover", function (d, i) {
             console.log(d)
